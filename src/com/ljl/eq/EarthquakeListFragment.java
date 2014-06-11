@@ -20,10 +20,13 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
+import android.annotation.SuppressLint;
+import android.annotation.TargetApi;
+import android.app.ListFragment;
 import android.location.Location;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.v4.app.ListFragment;
 import android.util.Log;
 import android.widget.ArrayAdapter;
 
@@ -34,6 +37,8 @@ import com.example.earthquake.R;
  * @author laijunlong
  *
  */
+@TargetApi(Build.VERSION_CODES.HONEYCOMB)
+@SuppressLint("NewApi")
 public class EarthquakeListFragment extends ListFragment {
 	ArrayAdapter<Quake> aa;
 	ArrayList<Quake> earthquakes = new ArrayList<Quake>();
@@ -83,15 +88,20 @@ public class EarthquakeListFragment extends ListFragment {
 					for(int i=0 ; i<nl.getLength() ; i++){
 						Element entry=(Element)nl.item(i);
 						Element title = (Element)entry.getElementsByTagName("title").item(0);
-						Element g = (Element)entry.getElementsByTagName("georss:point").item(0);
+						//Element g = (Element)entry.getElementsByTagName("georss:point").item(0);
 						Element when = (Element)entry.getElementsByTagName("updated").item(0);
 						Element link = (Element)entry.getElementsByTagName("link").item(0);
 						
 						String details = title.getFirstChild().getNodeValue();
-						String hostname = "http://earthquake.usgs.gov";
-						String linkString = hostname + link.getAttribute("href");
+						//String hostname = "http://earthquake.usgs.gov";
+						String linkString = link.getAttribute("href");
 						
-						String point = g.getFirstChild().getNodeValue();
+						//String point = g.getFirstChild().getNodeValue();
+						//String[] location = point.split(" ");
+						Location l = new Location("dummyGPS");
+						l.setLatitude(Double.parseDouble("112.000"));
+						l.setAltitude(Double.parseDouble("34.111"));
+						
 						String dt = when.getFirstChild().getNodeValue();
 						SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ss'Z'");
 						Date qdate = new GregorianCalendar(0,0,0).getTime();
@@ -100,18 +110,15 @@ public class EarthquakeListFragment extends ListFragment {
 						}catch(ParseException e){
 							Log.d(TAG, "Date parsing exception.",e);
 						}
-						String[] location = point.split(" ");
-						Location l = new Location("dummyGPS");
-						l.setLatitude(Double.parseDouble(location[0]));
-						l.setAltitude(Double.parseDouble(location[1]));
+						
 						
 						String magnitudeString = details.split(" ")[1];
 						int end = magnitudeString.length()-1;
-						double magnitude = Double.parseDouble(magnitudeString.substring(0,end));
+						double magnitude = Double.parseDouble("31.2");
 						
-						details = details.split(",")[1].trim();
+						//details = details.split(",")[1].trim();
 						
-						final Quake quake = new Quake(qdate,details,l,magnitude,linkString);
+						final Quake quake = new Quake(qdate,"earthquake",l,magnitude,linkString);
 						handler.post(new Runnable() {
 							
 							@Override
